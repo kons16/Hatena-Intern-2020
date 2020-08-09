@@ -7,9 +7,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type TestCase struct {
+	in string
+	out string
+}
+
 func Test_Render(t *testing.T) {
-	src := `foo https://google.com/ bar`
-	html, err := Render(context.Background(), src)
-	assert.NoError(t, err)
-	assert.Equal(t, `foo <a href="https://google.com/">https://google.com/</a> bar`, html)
+	testCases := []TestCase{
+		{
+			in:		"# text",
+			out:	"<h1>text</h1>\n",
+		},
+		{
+			in:		"## text2",
+			out:	"<h2>text2</h2>\n",
+		},
+		{
+			in:		"[Google](https://www.google.co.jp/)",
+			out:	"<p><a href=\"https://www.google.co.jp/\">Google</a></p>\n",
+		},
+		{
+			in:		"- list",
+			out:	"<ul>\n<li>list</li>\n</ul>\n",
+		},
+	}
+
+	for _, testCase := range testCases {
+		html, err := Render(context.Background(), testCase.in)
+		assert.NoError(t, err)
+		assert.Equal(t, testCase.out, html)
+	}
 }
