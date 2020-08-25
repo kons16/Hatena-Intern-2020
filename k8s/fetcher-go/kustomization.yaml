@@ -3,6 +3,6 @@ kind: Kustomization
 resources:
 - app.yaml
 configMapGenerator:
-- name: fetcher-ts-app-env-vars
+- name: fetcher-go-app-env-vars
   literals:
   - MODE=development

@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fetcher-go
+  labels:
+    app: fetcher-go
+spec:
+  ports:
+    - port: 50052
+  selector:
+    app: fetcher-go
+    tier: app
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fetcher-go
+  labels:
+    app: fetcher-go
+spec:
+  selector:
+    matchLabels:
+      app: fetcher-go
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: fetcher-go
+        tier: app
+    spec:
+      containers:
+        - image: hatena-intern-2020-fetcher-go
+          imagePullPolicy: Never
+          name: fetcher-go
+          env:
+            - name: GRPC_PORT
+              value: "50052"
+          envFrom:
+            - configMapRef:
+                name: fetcher-go-app-env-vars
+          resources:
+            requests:
+              cpu: 100m
+              memory: 10Mi
+            limits:
+              cpu: 200m
+              memory: 20Mi
+          ports:
+            - containerPort: 50052
+              name: fetcher-go
+          readinessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:50052", "-connect-timeout=5s", "-rpc-timeout=5s"]
+            initialDelaySeconds: 5
+          livenessProbe:
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:50052", "-connect-timeout=5s", "-rpc-timeout=5s"]
+            initialDelaySeconds: 10
+          securityContext:
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - all
+              add:
+                - NET_BIND_SERVICE
+            readOnlyRootFilesystem: true
