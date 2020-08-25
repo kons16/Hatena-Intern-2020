@@ -1,7 +1,7 @@
 {{define "title"}}{{.Blog.Title}}{{end}}
 
 {{define "body"}}
-<section>
+<div id="b-sec1">
   <header>
     <h1><a href="/blogs/{{.Blog.Path}}">{{.Blog.Title}}</a></h1>
     <p>{{.Blog.Description}}</p>
@@ -9,9 +9,9 @@
     <p><a href="/my/blogs/{{.Blog.Path}}">管理</a></p>
     {{end}}
   </header>
-  <section>
+  <div id="b-sec2">
     {{range .Entries}}
-    <article>
+    <div id="b-article">
       <header>
         <h1><a href="/blogs/{{$.Blog.Path}}/entries/{{.ID}}">{{.Title}}</a></h1>
         <p>{{.PublishedAt}}</p>
@@ -19,8 +19,8 @@
         <p><a href="/my/blogs/{{$.Blog.Path}}/entries/{{.ID}}">編集</a></p>
         {{end}}
       </header>
-      <section>{{.BodyHTML | unescapedHTML}}</section>
-    </article>
+      <div id="b-sec3">{{.BodyHTML | unescapedHTML}}</div>
+    </div>
     {{end}}
     <footer>
       <p>
@@ -39,6 +39,6 @@
         </span>
       </p>
     </footer>
-  </section>
-</section>
+  </div>
+</div>
 {{end}}
