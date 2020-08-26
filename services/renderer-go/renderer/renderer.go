@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"log"
 	"regexp"
+	"strings"
 )
 
 type RenderApp struct {
@@ -39,18 +40,20 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 	// [](URL) からURLのみを正規表現で抽出
 	r := regexp.MustCompile(`\[\]\((.+?)\)`)
 	results := r.FindAllStringSubmatch(src, -1)
-	if len(results) != 0 && results[0][0] != "" {
-		url := results[0][1]
 
-		// fetcherCli.Fetcherより、urlからtitleを取得
-		reply, err := ra.fetcherClient.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
-		if err != nil {
-			return "", err
+	if len(results) != 0 {
+		for _, result := range results {
+			// fetcherCli.Fetcherより、urlからtitleを取得
+			url := result[1]
+			reply, err := ra.fetcherClient.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
+			if err != nil {
+				return url, err
+			}
+
+			set := "[" + reply.Title + "]" + "(" + url + ")"
+			target := "[](" + url + ")"
+			src = strings.Replace(src, target, set, 1)
 		}
-
-		inputTitle := "[" + reply.Title + "]"
-		r2 := regexp.MustCompile(`\[\]`)
-		src = r2.ReplaceAllString(src, inputTitle)
 	}
 
 	var buf bytes.Buffer
