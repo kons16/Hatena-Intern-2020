@@ -38,8 +38,8 @@ func Render(ctx context.Context, src string) (string, error) {
 		defer fetcherConn.Close()
 		fetcherCli := pb_fetcher.NewFetcherClient(fetcherConn)
 
-		// fetcherより、urlからtitleを取得
 		url := results[0][1]
+		// fetcherCli.Fetcherより、urlからtitleを取得
 		reply, err := fetcherCli.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
 		if err != nil {
 			return "", err

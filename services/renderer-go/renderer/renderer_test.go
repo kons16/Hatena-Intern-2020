@@ -30,10 +30,6 @@ func Test_Render(t *testing.T) {
 			in:		"- list",
 			out:	"<ul>\n<li>list</li>\n</ul>\n",
 		},
-		{
-			in:		"[](https://qiita.com/gold-kou/items/a1cc2be6045723e242eb/)",
-			out:	"<p><a href=\"https://example.com/\">いまさらだけどgRPCに入門したので分かりやすくまとめてみた - Qiita</a></p>\n",
-		},
 	}
 
 	for _, testCase := range testCases {
