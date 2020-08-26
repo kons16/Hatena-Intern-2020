@@ -12,16 +12,17 @@ import (
 type Server struct {
 	pb.UnimplementedRendererServer
 	healthpb.UnimplementedHealthServer
+	ra *renderer.RenderApp
 }
 
 // NewServer は gRPC サーバーを作成する
-func NewServer() *Server {
-	return &Server{}
+func NewServer(ra *renderer.RenderApp) *Server {
+	return &Server{ra:ra}
 }
 
 // Render は受け取った文書を HTML に変換する
 func (s *Server) Render(ctx context.Context, in *pb.RenderRequest) (*pb.RenderReply, error) {
-	html, err := renderer.Render(ctx, in.Src)
+	html, err := s.ra.Render(ctx, in.Src)
 	if err != nil {
 		return nil, err
 	}

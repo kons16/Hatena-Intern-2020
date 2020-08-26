@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
-	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/renderer"
 	"net"
 	"os"
 	"os/signal"
@@ -16,10 +14,10 @@ import (
 	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/config"
-	server "github.com/hatena/Hatena-Intern-2020/services/renderer-go/grpc"
-	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/log"
-	pb "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/renderer"
+	"github.com/hatena/Hatena-Intern-2020/services/fetcher-go/config"
+	server "github.com/hatena/Hatena-Intern-2020/services/fetcher-go/grpc"
+	"github.com/hatena/Hatena-Intern-2020/services/fetcher-go/log"
+	pb "github.com/hatena/Hatena-Intern-2020/services/fetcher-go/pb/fetcher"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
@@ -46,17 +44,6 @@ func run(args []string) error {
 	}
 	defer logger.Sync()
 
-	// Fetcher (URLからタイトル取得) サービスに接続
-	fetcherConn, err := grpc.Dial(conf.FetcherAddr, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		return fmt.Errorf("failed to connect to fetcher service: %+v", err)
-	}
-	defer fetcherConn.Close()
-	fetcherCli := pb_fetcher.NewFetcherClient(fetcherConn)
-
-	// RendererApp の初期化
-	ra := renderer.NewRenderApp(fetcherCli)
-
 	// サーバーを起動
 	logger.Info(fmt.Sprintf("starting gRPC server (port = %v)", conf.GRPCPort))
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(conf.GRPCPort))
@@ -76,8 +63,8 @@ func run(args []string) error {
 			grpc_recovery.UnaryServerInterceptor(),
 		)),
 	)
-	svr := server.NewServer(ra)
-	pb.RegisterRendererServer(s, svr)
+	svr := server.NewServer()
+	pb.RegisterFetcherServer(s, svr)
 	healthpb.RegisterHealthServer(s, svr)
 	go stop(s, conf.GracefulStopTimeout, logger)
 	if err := s.Serve(lis); err != nil {
