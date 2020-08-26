@@ -3,6 +3,7 @@ package renderer
 import (
 	"bytes"
 	"context"
+	"fmt"
 	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -32,6 +33,7 @@ var md = goldmark.New(
 			goldmark.WithRendererOptions(
 				html.WithHardWraps(),
 				html.WithXHTML(),
+				html.WithUnsafe(),
 			),
 		)
 
@@ -40,6 +42,10 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 	// [](URL) からURLのみを正規表現で抽出
 	r := regexp.MustCompile(`\[\]\((.+?)\)`)
 	results := r.FindAllStringSubmatch(src, -1)
+
+	// {色指定}(msg) で msg を指定の色に変更 (独自記法)
+	r2 := regexp.MustCompile(`\{(.+?)\}\((.+?)\)`)
+	resultOriginals := r2.FindAllStringSubmatch(src, -1)
 
 	for _, result := range results {
 		// fetcherCli.Fetcherより、urlからtitleを取得
@@ -52,6 +58,16 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 		set := "[" + reply.Title + "]" + "(" + url + ")"
 		target := "[](" + url + ")"
 		src = strings.Replace(src, target, set, 1)
+	}
+
+	for _, resultOriginal := range resultOriginals {
+		color := resultOriginal[1]
+		msg := resultOriginal[2]
+		colorTagMsg := "<a style=\"color:" + color + "\">" + msg + "</a>"
+		fmt.Println(colorTagMsg)
+
+		target := "{" + color + "}" + "(" + msg + ")"
+		src = strings.Replace(src, target, colorTagMsg, 1)
 	}
 
 	var buf bytes.Buffer
