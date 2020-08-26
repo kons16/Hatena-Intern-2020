@@ -41,19 +41,17 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 	r := regexp.MustCompile(`\[\]\((.+?)\)`)
 	results := r.FindAllStringSubmatch(src, -1)
 
-	if len(results) != 0 {
-		for _, result := range results {
-			// fetcherCli.Fetcherより、urlからtitleを取得
-			url := result[1]
-			reply, err := ra.fetcherClient.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
-			if err != nil {
-				return url, err
-			}
-
-			set := "[" + reply.Title + "]" + "(" + url + ")"
-			target := "[](" + url + ")"
-			src = strings.Replace(src, target, set, 1)
+	for _, result := range results {
+		// fetcherCli.Fetcherより、urlからtitleを取得
+		url := result[1]
+		reply, err := ra.fetcherClient.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
+		if err != nil {
+			return url, err
 		}
+
+		set := "[" + reply.Title + "]" + "(" + url + ")"
+		target := "[](" + url + ")"
+		src = strings.Replace(src, target, set, 1)
 	}
 
 	var buf bytes.Buffer
