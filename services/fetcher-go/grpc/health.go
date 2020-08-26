@@ -13,7 +13,7 @@ import (
 
 // Check はサービスの稼働状況を返す
 func (s *Server) Check(ctx context.Context, in *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
-	if in.Service == "" || in.Service == "fetcher.Renderer" {
+	if in.Service == "" || in.Service == "fetcher.Fetcher" {
 		return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 	} else {
 		return nil, status.Error(codes.NotFound, "service not found")
