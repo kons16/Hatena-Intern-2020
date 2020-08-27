@@ -3,15 +3,14 @@ package renderer
 import (
 	"bytes"
 	"context"
-	"fmt"
 	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
+	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/renderer/original_notion"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
 	"html/template"
 	"log"
 	"regexp"
-	"strings"
 )
 
 type RenderApp struct {
@@ -39,37 +38,21 @@ var md = goldmark.New(
 
 // Render は受け取った文書を HTML に変換する
 func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
-	// [](URL) からURLのみを正規表現で抽出
-	r := regexp.MustCompile(`\[\]\((.+?)\)`)
-	results := r.FindAllStringSubmatch(src, -1)
+	on := original_notion.NewOriginalNotion(ra.fetcherClient, ctx)
 
-	// {色指定}(msg) で msg を指定の色に変更 (独自記法)
-	r2 := regexp.MustCompile(`\{(.+?)\}\((.+?)\)`)
-	resultOriginals := r2.FindAllStringSubmatch(src, -1)
-
-	for _, result := range results {
-		// fetcherCli.Fetcherより、urlからtitleを取得
-		url := result[1]
-		reply, err := ra.fetcherClient.Fetcher(ctx, &pb_fetcher.FetcherRequest{Url: url})
-		if err != nil {
-			return url, err
-		}
-
-		set := "[" + reply.Title + "]" + "(" + url + ")"
-		target := "[](" + url + ")"
-		src = strings.Replace(src, target, set, 1)
+	// title から url をセット
+	src, err := on.SetTitle(src)
+	if err != nil {
+		return "", err
 	}
 
-	for _, resultOriginal := range resultOriginals {
-		color := resultOriginal[1]
-		msg := resultOriginal[2]
-		colorTagMsg := "<span style=\"color:" + color + "\">" + msg + "</span>"
-		fmt.Println(colorTagMsg)
-
-		target := "{" + color + "}" + "(" + msg + ")"
-		src = strings.Replace(src, target, colorTagMsg, 1)
+	// 独自記法で色のセット
+	src, err = on.SetColor(src)
+	if err != nil {
+		return "", err
 	}
 
+	// src を markdown に
 	var buf bytes.Buffer
 	if err := md.Convert([]byte(src), &buf); err != nil {
 	  log.Fatal(err)
