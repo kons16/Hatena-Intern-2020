@@ -30,10 +30,16 @@ func Test_Render(t *testing.T) {
 			in:		"- list",
 			out:	"<ul>\n<li>list</li>\n</ul>\n",
 		},
+		{
+			in:		"aaa {red}(赤色) aaa",
+			out: 	"<p>aaa <a style=\"color:red\">赤色</a> aaa</p>\n",
+		},
+
 	}
 
+	ra := &RenderApp{nil}
 	for _, testCase := range testCases {
-		html, err := Render(context.Background(), testCase.in)
+		html, err := ra.Render(context.Background(), testCase.in)
 		assert.NoError(t, err)
 		assert.Equal(t, testCase.out, html)
 	}
