@@ -40,6 +40,14 @@ func Test_Render(t *testing.T) {
 			in:		"aaa {red}(赤色) aaa",
 			out: 	"<p>aaa <span style=\"color:red\">赤色</span> aaa</p>\n",
 		},
+		{
+			in:		"%イチロー%",
+			out:	"<p><a href=\"https://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%81%E3%83%AD%E3%83%BC\">イチロー</a></p>\n",
+		},
+		{
+			in:		"%イチロー% [](https://www.google.com/)",
+			out:	"<p><a href=\"https://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%81%E3%83%AD%E3%83%BC\">イチロー</a> <a href=\"https://www.google.com/\">Google</a></p>\n",
+		},
 	}
 
 	ctrl := gomock.NewController(t)
@@ -47,7 +55,7 @@ func Test_Render(t *testing.T) {
 
 	mockFetcher := mock_fetcher.NewMockFetcherClient(ctrl)
 	reply := &pb_fetcher.FetcherReply{Title: "Google"}
-	mockFetcher.EXPECT().Fetcher(context.Background(), &pb_fetcher.FetcherRequest{Url: "https://www.google.com/"}).Return(reply, nil)
+	mockFetcher.EXPECT().Fetcher(context.Background(), &pb_fetcher.FetcherRequest{Url: "https://www.google.com/"}).Return(reply, nil).AnyTimes()
 
 	ra := &RenderApp{fetcherClient: mockFetcher}
 	for _, testCase := range testCases {
