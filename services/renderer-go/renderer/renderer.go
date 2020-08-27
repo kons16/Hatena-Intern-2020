@@ -63,7 +63,7 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 	for _, resultOriginal := range resultOriginals {
 		color := resultOriginal[1]
 		msg := resultOriginal[2]
-		colorTagMsg := "<a style=\"color:" + color + "\">" + msg + "</a>"
+		colorTagMsg := "<span style=\"color:" + color + "\">" + msg + "</span>"
 		fmt.Println(colorTagMsg)
 
 		target := "{" + color + "}" + "(" + msg + ")"
