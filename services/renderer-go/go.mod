@@ -3,6 +3,7 @@ module github.com/hatena/Hatena-Intern-2020/services/renderer-go
 go 1.14
 
 require (
+	github.com/golang/mock v1.4.3
 	github.com/golang/protobuf v1.4.1
 	github.com/yuin/goldmark v1.2.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.2.0
@@ -10,5 +11,4 @@ require (
 	go.uber.org/zap v1.15.0
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0
-	github.com/golang/mock v1.4.4
 )
