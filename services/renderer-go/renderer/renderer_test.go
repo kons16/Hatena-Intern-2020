@@ -38,7 +38,7 @@ func Test_Render(t *testing.T) {
 		},
 		{
 			in:		"aaa {red}(赤色) aaa",
-			out: 	"<p>aaa <a style=\"color:red\">赤色</a> aaa</p>\n",
+			out: 	"<p>aaa <span style=\"color:red\">赤色</span> aaa</p>\n",
 		},
 	}
 
