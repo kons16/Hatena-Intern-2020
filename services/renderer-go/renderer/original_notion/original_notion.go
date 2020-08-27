@@ -56,3 +56,21 @@ func (on *OriginalNotion) SetColor(src string) (string, error) {
 
 	return src, nil
 }
+
+// %msg% で msg を msgのwiki へリンクさせる
+func (on *OriginalNotion) SetWikiLink(src string) (string, error) {
+	r2 := regexp.MustCompile(`\%(.+?)\%`)
+	resultOriginals := r2.FindAllStringSubmatch(src, -1)
+
+	wikiBase := "https://ja.wikipedia.org/wiki/"
+
+	for _, resultOriginal := range resultOriginals {
+		msg := resultOriginal[1]
+		setUrl := "[" + msg + "]" + "(" + wikiBase + msg + ")"
+
+		target := "%" + msg + "%"
+		src = strings.Replace(src, target, setUrl, 1)
+	}
+
+	return src, nil
+}

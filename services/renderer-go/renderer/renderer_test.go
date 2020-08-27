@@ -40,6 +40,10 @@ func Test_Render(t *testing.T) {
 			in:		"aaa {red}(赤色) aaa",
 			out: 	"<p>aaa <span style=\"color:red\">赤色</span> aaa</p>\n",
 		},
+		{
+			in:		"%イチロー%",
+			out:	"<p><a href=\"https://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%81%E3%83%AD%E3%83%BC\">イチロー</a></p>\n",
+		},
 	}
 
 	ctrl := gomock.NewController(t)

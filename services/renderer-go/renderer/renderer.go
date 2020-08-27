@@ -52,6 +52,12 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 		return "", err
 	}
 
+	// 独自記法でwikiのリンクセット
+	src, err = on.SetWikiLink(src)
+	if err != nil {
+		return "", err
+	}
+
 	// src を markdown に
 	var buf bytes.Buffer
 	if err := md.Convert([]byte(src), &buf); err != nil {
