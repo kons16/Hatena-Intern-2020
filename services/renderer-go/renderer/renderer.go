@@ -5,6 +5,7 @@ import (
 	"context"
 	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
 	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/renderer/original_notion"
+	"github.com/patrickmn/go-cache"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/renderer/html"
@@ -15,13 +16,15 @@ import (
 
 type RenderApp struct {
 	fetcherClient	pb_fetcher.FetcherClient
+	c *cache.Cache
 }
 
 // NewRenderApp は RenderApp を作成する
 func NewRenderApp(
 	fetcherClient	pb_fetcher.FetcherClient,
+	c *cache.Cache,
 ) *RenderApp {
-	return &RenderApp{fetcherClient}
+	return &RenderApp{fetcherClient, c}
 }
 
 var urlRE = regexp.MustCompile(`https?://[^\s]+`)
@@ -41,7 +44,7 @@ func (ra *RenderApp) Render(ctx context.Context, src string) (string, error) {
 	on := original_notion.NewOriginalNotion(ra.fetcherClient, ctx)
 
 	// title から url をセット
-	src, err := on.SetTitle(src)
+	src, err := on.SetTitle(src, ra.c)
 	if err != nil {
 		return "", err
 	}

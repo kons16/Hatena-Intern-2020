@@ -4,6 +4,7 @@ import (
 	"fmt"
 	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
 	"github.com/hatena/Hatena-Intern-2020/services/renderer-go/renderer"
+	"github.com/patrickmn/go-cache"
 	"net"
 	"os"
 	"os/signal"
@@ -54,8 +55,11 @@ func run(args []string) error {
 	defer fetcherConn.Close()
 	fetcherCli := pb_fetcher.NewFetcherClient(fetcherConn)
 
+	// cacheの初期化
+	c := cache.New(5*time.Minute, 10*time.Minute)
+
 	// RendererApp の初期化
-	ra := renderer.NewRenderApp(fetcherCli)
+	ra := renderer.NewRenderApp(fetcherCli, c)
 
 	// サーバーを起動
 	logger.Info(fmt.Sprintf("starting gRPC server (port = %v)", conf.GRPCPort))
