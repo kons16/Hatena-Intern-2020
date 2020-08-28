@@ -3,6 +3,7 @@ package original_notion
 import (
 	"context"
 	pb_fetcher "github.com/hatena/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
+	"github.com/patrickmn/go-cache"
 	"regexp"
 	"strings"
 )
@@ -20,21 +21,30 @@ func NewOriginalNotion(fc pb_fetcher.FetcherClient, ctx context.Context) *Origin
 }
 
 // [](url) で url からタイトルをセット
-func (on *OriginalNotion) SetTitle(src string) (string, error) {
+func (on *OriginalNotion) SetTitle(src string, c *cache.Cache) (string, error) {
 	r := regexp.MustCompile(`\[\]\((.+?)\)`)
 	results := r.FindAllStringSubmatch(src, -1)
 
 	for _, result := range results {
-		// fetcherCli.Fetcherより、urlからtitleを取得
 		url := result[1]
-		reply, err := on.fc.Fetcher(on.ctx, &pb_fetcher.FetcherRequest{Url: url})
-		if err != nil {
-			return url, err
-		}
+		getCacheTitle, found := c.Get(url)
 
-		set := "[" + reply.Title + "]" + "(" + url + ")"
-		target := "[](" + url + ")"
-		src = strings.Replace(src, target, set, 1)
+		if found {
+			set := "[" + getCacheTitle.(string) + "]" + "(" + url + ")"
+			target := "[](" + url + ")"
+			src = strings.Replace(src, target, set, 1)
+		} else {
+			// cacheにない場合、fetcherCli.Fetcherより、urlからtitleを取得
+			reply, err := on.fc.Fetcher(on.ctx, &pb_fetcher.FetcherRequest{Url: url})
+			if err != nil {
+				return url, err
+			}
+			c.Set(url, reply.Title, cache.DefaultExpiration)
+
+			set := "[" + reply.Title + "]" + "(" + url + ")"
+			target := "[](" + url + ")"
+			src = strings.Replace(src, target, set, 1)
+		}
 	}
 
 	return src, nil

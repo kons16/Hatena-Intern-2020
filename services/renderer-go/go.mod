@@ -11,4 +11,5 @@ require (
 	go.uber.org/zap v1.15.0
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 )
